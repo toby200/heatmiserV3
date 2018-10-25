@@ -1,23 +1,27 @@
-"""Live tests"""
+from heatmiserV3.config import Config
+from heatmiserV3.devices import Device, Master
+
 import unittest
-import json
-from heatmiserV3 import heatmiser, connection
 
+class TestLive(unittest.TestCase):
 
-class TestLiveHeatmiserThermostat(unittest.TestCase):
-    """Testing an actual thermostat"""
-    def setUp(self):
-        """Creates serial con and thermostat"""
-        self.con = connection.hmserial('192.168.1.57', '100')
-        self.con.open()
-        self.thermostat1 = heatmiser.HeatmiserThermostat(1, 'prt', self.con)
+    def test_request_all(self):
+        master = Master(Config.MASTER_IRQ_ADDRESS)
 
-    def test_read_dcb(self):
-        """This test makes sure that the values map correctly"""
-        data = self.thermostat1.get_dcb()
-        print(json.dumps(data, indent=2))
-        assert data[11]['value'] == 1
+        location = Config.MASTER_LOCATION['location']
 
-    def tearDown(self):
-        """Shutdown serial conn"""
-        self.con.close()
+        if Config.MASTER_LOCATION['type'].casefold() == 'ip'.casefold():
+            master.connect_ip(location)
+        elif Config.MASTER_LOCATION['type'].casefold() == 'device'.casefold():
+            master.connect_device(location)
+        else:
+            raise ValueError("Unrecognized value for Config.MASTER_LOCATION.type, try ip or device", Config.MASTER_LOCATION[
+                'type'])
+
+        # for i in range(0,33):
+        i = 0
+        print("Testing ", i)
+        tm1 = Device("tm1", "Boat Timer", i)
+        master.send_request_all(tm1)
+
+        master.close_connection()

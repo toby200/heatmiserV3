@@ -1,0 +1,184 @@
+##Notes
+#
+# All fields without a type are one byte unless byte length is specified
+#
+# For multi-byte fields, they are high byte first when read, low byte first when write, except in the header data
+# where it's always low byte first
+
+structures:
+  time:
+    length: 2
+    0: hour
+    1: minute
+  dow-time:
+    length: 4
+    0: day of week #1-7
+    1: hour
+    2: minute
+    3: seconds
+  2-byte:
+    length: 2
+    0: byte1
+    1: byte2
+  time-temp:
+    length: 3
+    0:
+      type: time
+      name: time
+    3: temp
+  period:
+    length: 4
+    0:
+      type: time
+      name: On Time
+    2:
+      type: time
+      name: Off Time
+  day-temps:
+    length: 12
+    0:
+      type: time-temp
+      name: Time 1
+    3:
+      type: time-temp
+      name: Time 2
+    6:
+      type: time-temp
+      name: Time 3
+    9:
+      type: time-temp
+      name: Time 4
+  timer-block:
+    length: 16
+    0:
+      type: period
+      name: Period 1
+    4:
+      type: period
+      name: Period 2
+    8:
+      type: period
+      name: Period 3
+    12:
+      type: period
+      name: Period 4
+protocols:
+  tm1: # Also tm1-N
+    fields:
+      0,0:
+        name: Length
+        type: 2-byte
+      2,2:    Vendor ID
+      3,3:    Version #In decimal, 10=Version 1.0
+      4,4:    Model
+      11,5:   Address
+      16,6:   Program mode # not writable
+      21,7:   On/Off
+      22,8:   Key lock
+      24,10:
+        name: Holiday hours
+        type: 2-byte
+      26,12:
+        name: Countdown minutes
+        type: 2-byte
+      42,14: Current timer state
+        # Read:  00=off, 01=on
+        # Write: 01=Force on, 02=Force off
+      43,15:
+        name: Current time
+        type: dow-time
+  ## End DCB here if program mode is 02 (countdown timer)
+      71,19:
+        name: Weekday
+        type: timer-block
+      87,35:
+        name: Weekend
+        type: timer-block
+  ## End DCB here if program mode is 00 (5/2 day)
+      187,51:
+        name: Monday
+        type: timer-block
+      203,67:
+        name: Tuesday
+        type: timer-block
+      219,83:
+        name: Wednesday
+        type: timer-block
+      235,99:
+        name: Thursday
+        type: timer-block
+      251,115:
+        name: Friday
+        type: timer-block
+      267,131:
+        name: Saturday
+        type: timer-block
+      283,147:
+        name: Sunday
+        type: timer-block
+#  prt:
+#    offsets:
+#      0: High 8 bit
+#      1: Low 8 bit
+#      2: Vendor ID
+#      3: 0-6 bits = Version, bit 7 = floor limit state.
+#      4: Model
+#      5: Temperature format
+#      6: Switch Differential
+#      7: Frost Protection Mode
+#      8: Calibration - high 8 bit
+#      9: Calibration - low 8 bit
+#      10: Output delay
+#      11: Address
+#      12: Up down key limit
+#      13: Sensor Selection
+#      14: Optimum start
+#      15: Rate of change
+#      16: Program mode
+#      17: Frost protect temp
+#      18: Set room temp
+#      19: Floor max limit
+#      20: Floor max limit enable/disable
+#      21: On/off
+#      22: Key lock
+#      23: Run mode
+#      24: Holiday hours
+#      25: Holiday hours
+#      26: Temp hold mins
+#      27: Temp hold mins
+#      28: Remote air temp
+#      29: Remote air temp
+#      30: Floor temp
+#      31: Floor temp
+#      32: Built in air temp
+#      33: Built in air temp
+#      34: Error code
+#      35: Current state
+#      36: Week 1~7
+#      37: Hour
+#      38: Min
+#      39: Sec
+#      40: Weekday
+#      41: Weekday
+#      42: Weekday
+#      43: Weekday
+#      44: Weekday
+#      45: Weekday
+#      46: Weekday
+#      47: Weekday
+#      48: Weekday
+#      49: Weekday
+#      50: Weekday
+#      51: Weekday
+#      52: Weekend
+#      53: Weekend
+#      54: Weekend
+#      55: Weekend
+#      56: Weekend
+#      57: Weekend
+#      58: Weekend
+#      59: Weekend
+#      60: Weekend
+#      61: Weekend
+#      62: Weekend
+#      63: Weekend
